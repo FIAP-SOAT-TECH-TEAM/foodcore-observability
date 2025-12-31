@@ -24,11 +24,11 @@ elasticsearch:
 
   resources:
     requests:
-      cpu: "200m"
+      cpu: "100m"
       memory: "512Mi"
     limits:
-      cpu: "400m"
-      memory: "1524Mi"
+      cpu: "300m"
+      memory: "1Gi"
 
   clusterName: k8s-logs
   javaOpts: "-Xms512m -Xmx512m"
