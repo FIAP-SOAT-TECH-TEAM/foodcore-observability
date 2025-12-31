@@ -1,0 +1,94 @@
+#!/bin/bash
+
+# Script centralizador para a onservability do Food Core API
+# Uso: ./food [comando] [opções]
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$SCRIPT_DIR/scripts"
+
+# Função para exibir ajuda
+show_help() {
+  echo "Food Core API (Onservability) - CLI de gerenciamento de infraestrutura (Observabilidade)"
+  echo
+  echo "Uso: ./food [comando] [opções]"
+  echo
+  echo "Comandos disponíveis:"
+  echo "  start:infra      Inicia apenas a infraestrutura (banco)"
+  echo "  stop:infra       Para apenas a infraestrutura"
+  echo "  restart:all      Reinicia todos os serviços da infraestrutura"
+  echo "  help             Exibe esta mensagem de ajuda"
+  echo
+  echo "Opções:"
+  echo "  --force, -f      Força a execução sem confirmação"
+  echo
+  echo "Exemplos:"
+  echo "  ./food start:infra        Inicia a infraestrutura"
+  echo "  ./food stop:infra         Para a infraestrutura"
+  echo "  ./food restart:all        Reinicia a infraestrutura"
+}
+
+# Verificar se o Docker está rodando
+check_docker() {
+  docker info &>/dev/null
+  return $?
+}
+
+if ! check_docker; then
+  echo "ERRO: O Docker não está rodando."
+  echo "Por favor, inicie o Docker Desktop e tente novamente."
+  exit 1
+fi
+
+# Verificar se o comando foi fornecido
+if [ $# -eq 0 ]; then
+  show_help
+  exit 1
+fi
+
+# Processar opções
+FORCE_FLAG=""
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --force|-f)
+      FORCE_FLAG="--force"
+      shift
+      ;;
+    *)
+      COMMAND="$1"
+      shift
+      ;;
+  esac
+done
+
+# Executar o comando apropriado
+case "$COMMAND" in
+  start:infra)
+    echo "Iniciando a infraestrutura..."
+    "$SCRIPTS_DIR/infra-up.sh" $FORCE_FLAG
+    # Verificar se a rede fastfood-network existe, se não, criar
+    if ! docker network ls | grep -q fastfood-network; then
+      echo "Criando rede compartilhada fastfood-network..."
+      docker network create fastfood-network
+    fi
+    ;;
+  stop:infra)
+    echo "Parando a infraestrutura..."
+    "$SCRIPTS_DIR/infra-down.sh"
+    ;;
+  restart:all)
+    echo "Reiniciando a infraestrutura..."
+    "$SCRIPTS_DIR/infra-restart.sh" $FORCE_FLAG
+    ;;
+  init:user)
+    echo "Inicializando usuário no LocalStack..."
+    "$SCRIPTS_DIR/init-user.sh"
+    ;;
+  help)
+    show_help
+    ;;
+  *)
+    echo "ERRO: Comando desconhecido: $COMMAND"
+    echo "Use './food help' para ver os comandos disponíveis."
+    exit 1
+    ;;
+esac
