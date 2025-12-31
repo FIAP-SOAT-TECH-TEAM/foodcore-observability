@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "grafana.fullname" . }}-config-ds
+  labels:
+    app: {{ include "grafana.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+data:
+  prometheusDatasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: DS_PROMETHEUS
+        type: prometheus
+        access: proxy
+        url: http://{{ printf "%s-service" (include "prometheus.fullname" .) }}:{{ .Values.prometheus.ports.port }}{{ .Values.prometheus.ingress.path }}
+        isDefault: false

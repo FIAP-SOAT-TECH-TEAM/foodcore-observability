@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "prometheus.fullname" . }}-deployment
+  labels:
+    app: {{ include "prometheus.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+spec:
+  replicas: {{ .Values.prometheus.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "prometheus.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "prometheus.name" . }}
+    spec:
+      serviceAccountName: {{ include "prometheus.fullname" . }}-serviceaccount
+      containers:
+        - name: {{ include "prometheus.name" . }}
+          image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.prometheus.ports.port }}
+              name: {{ .Values.prometheus.ports.name }}
+          volumeMounts:
+            - name: {{ .Values.prometheus.volumes.prometheusconfig.name }}
+              mountPath: {{ .Values.prometheus.volumes.prometheusconfig.mountPath }}
+              subPath: {{ .Values.prometheus.volumes.prometheusconfig.subPath }}
+          args:
+            - "--web.route-prefix={{ .Values.prometheus.ingress.path }}"
+            - "--web.external-url={{ .Values.prometheus.ingress.path }}"
+          resources:
+            limits:
+              cpu: {{ .Values.prometheus.resources.limits.cpu }}
+              memory: {{ .Values.prometheus.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.prometheus.resources.requests.cpu }}
+              memory: {{ .Values.prometheus.resources.requests.memory }}
+      volumes:
+        - name: {{ .Values.prometheus.volumes.prometheusconfig.name }}
+          configMap:
+            name: {{ include "prometheus.fullname" . }}-config

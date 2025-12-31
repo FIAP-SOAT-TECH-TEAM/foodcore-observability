@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "elasticsearch.fullname" . }}-statefulset
+  namespace: {{ .Values.namespace.monitor.name }}
+spec:
+  serviceName: {{ include "elasticsearch.name" . }}
+  replicas: {{ .Values.elasticsearch.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "elasticsearch.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "elasticsearch.name" . }}
+    spec:
+      containers:
+        - name: {{ include "elasticsearch.name" . }}
+          image: "{{ .Values.elasticsearch.image.repository }}:{{ .Values.elasticsearch.image.tag }}"
+          resources:
+            limits:
+              cpu: {{ .Values.elasticsearch.resources.limits.cpu }}
+              memory: {{ .Values.elasticsearch.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.elasticsearch.resources.requests.cpu }}
+              memory: {{ .Values.elasticsearch.resources.requests.memory }}
+          ports:
+            - containerPort: {{ .Values.elasticsearch.ports.rest }}
+              name: {{ .Values.elasticsearch.ports.nameApi | quote }}
+              protocol: TCP
+            - containerPort: {{ .Values.elasticsearch.ports.interNode }}
+              name: {{ .Values.elasticsearch.ports.nameInternal | quote }}
+              protocol: TCP
+          volumeMounts:
+            - name: {{ include "elasticsearch.fullname" . }}-pvc
+              mountPath: {{ .Values.elasticsearch.volumes.elasticvolume.mountPath | quote }}
+          env:
+            - name: cluster.name
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "elasticsearch.fullname" . }}-config
+                  key: cluster.name
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ES_JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "elasticsearch.fullname" . }}-config
+                  key: ES_JAVA_OPTS
+            - name: discovery.type
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "elasticsearch.fullname" . }}-config
+                  key: discovery.type
+            - name: xpack.security.enabled
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "elasticsearch.fullname" . }}-config
+                  key: xpack.security.enabled
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 {{ .Values.elasticsearch.volumes.elasticvolume.mountPath }}"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: {{ include "elasticsearch.fullname" . }}-pvc
+              mountPath: {{ .Values.elasticsearch.volumes.elasticvolume.mountPath | quote }}
+        - name: increase-vm-max-map
+          image: busybox
+          command: ["sysctl", "-w", "vm.max_map_count={{ .Values.elasticsearch.vm.max_map_count }}"]
+          securityContext:
+            privileged: true
+        - name: increase-fd-ulimit
+          image: busybox
+          command: ["sh", "-c", "ulimit -n 65536"]
+          securityContext:
+            privileged: true
+
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "elasticsearch.fullname" . }}-pvc
+      labels:
+        app: {{ include "elasticsearch.name" . }}
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: {{ include "storageclass.fullname" . }}-storageclass
+      resources:
+        requests:
+          storage: {{ .Values.elasticsearch.storageSize }}

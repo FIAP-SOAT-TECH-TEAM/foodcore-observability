@@ -1,0 +1,225 @@
+namespace:
+  monitor:
+    name: replaced
+  order:
+    name: replaced
+  catalog:
+    name: replaced
+  payment:
+    name: replaced
+
+ingress:
+  hosts:
+    - host: "replaced"
+  tls: []
+
+elasticsearch:
+  name: "elasticsearch"
+
+  replicaCount: 1
+
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: "8.13.4"
+
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "400m"
+      memory: "1524Mi"
+
+  clusterName: k8s-logs
+  javaOpts: "-Xms512m -Xmx512m"
+  discoveryType: "single-node"
+  sslEnabled: false
+
+  storageSize: 3Gi
+
+  volumes:
+    elasticvolume:
+      mountPath: /var/lib/elasticsearch/data
+
+  ports:
+    rest: 9200
+    interNode: 9300
+    nameApi: rest
+    nameInternal: inter-node
+
+  vm:
+    max_map_count: 262144
+
+fluentd:
+  name: fluentd
+
+  image:
+    repository: fluent/fluentd-kubernetes-daemonset
+    tag: v1.18-debian-elasticsearch8-1
+
+  elasticsearch:
+    scheme: "http"
+
+  systemdConf: "disable"
+  containerTailParserType: "cri"
+  skipLabels: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+
+  volumes:
+    varlog:
+      name: varlog
+      hostPath: /var/log
+      mountPath: /var/log
+
+kibana:
+  name: kibana
+
+  replicaCount: 1
+
+  image:
+    repository: docker.elastic.co/kibana/kibana
+    tag: "8.13.4"
+
+  ports:
+    port: 80
+    targetPort: 5601
+    name: http
+  
+  ingress:
+    path: /kibana
+    pathType: Prefix
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+
+  volumes:
+    kibanaconfig:
+      name: kibana-config
+      mountPath: /usr/share/kibana/config/kibana.yml
+      subPath: kibana.yml
+
+  serverRewriteBasePath: true
+  serverHost: "0.0.0.0"
+
+grafana:
+  name: grafana
+
+  replicaCount: 1
+
+  image:
+    repository: grafana/grafana 
+    tag: "latest"
+
+  ingress:
+    path: /grafana
+    pathType: Prefix
+
+  volumes:
+    grafanaconfig:
+      name: grafana-config
+      items:
+        - mountPath: /etc/grafana/grafana.ini
+          subPath: grafana.ini
+        - mountPath: /etc/grafana/provisioning/dashboards/provider.yaml
+          subPath: provider.yaml
+
+    grafanadatasources:
+      name: grafana-datasources
+      mountPath: /etc/grafana/provisioning/datasources
+    
+    grafanadashboards:
+      name: grafana-dashboards
+      mountPath: /var/lib/grafana/dashboards
+
+  ports:
+    port: 80
+    targetPort: 3000
+    name: http
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+
+prometheus:
+  name: prometheus
+
+  replicaCount: 1
+
+  image:
+    repository: prom/prometheus
+    tag: "latest"
+
+  ingress:
+    path: /prometheus
+    pathType: Prefix
+
+  ports:
+    port: 80
+    targetPort: 9090
+    name: http
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+
+  volumes:
+    prometheusconfig:
+      name: prometheus-config
+      mountPath: /prometheus/prometheus.yml
+      subPath: prometheus.yml
+
+zipkin:
+  name: zipkin
+
+  replicaCount: 1
+
+  image:
+    repository: openzipkin/zipkin
+    tag: "latest"
+
+  ingress:
+    path: /zipkin
+    pathType: Prefix
+  
+  ports:
+    port: 80
+    targetPort: 9411
+    name: http
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+
+storageClass:
+  name: azure-disk
+  skuName: Standard_LRS
+  kind: Managed
+  cachingMode: ReadOnly
+  reclaimPolicy: Delete
+  volumeBindingMode: WaitForFirstConsumer
+  allowVolumeExpansion: true
+  fsType: ext4

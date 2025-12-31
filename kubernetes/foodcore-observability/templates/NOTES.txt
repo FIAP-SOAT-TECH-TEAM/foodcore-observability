@@ -1,0 +1,11 @@
+🍔 Food Core Observability - Helm Chart Deployment
+🎯 Serviços de observabilidade
+
+🔎 Kibana (Monitoramento EFK)
+📡 Prometheus (Métricas de Aplicação)
+📊 Grafana (Dashboards de Monitoramento)
+
+🚀 Serviços de observabilidade implantados com sucesso! 
+🌐 Consulte FQDN do Frontend IP Configuration público do Application Gateway (Ingress)!
+
+📖 Documentação completa: https://github.com/FIAP-SOAT-TECH-TEAM/foodcore-observability

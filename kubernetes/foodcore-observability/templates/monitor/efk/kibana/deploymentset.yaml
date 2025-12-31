@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kibana.fullname" . }}-deployment
+  labels:
+    app: {{ include "kibana.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+spec:
+  replicas: {{ .Values.kibana.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "kibana.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "kibana.name" . }}
+    spec:
+      containers:
+        - name: {{ include "kibana.name" . }}
+          image: "{{ .Values.kibana.image.repository }}:{{ .Values.kibana.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.kibana.ports.port }}
+              name: {{ .Values.kibana.ports.name }}
+          volumeMounts:
+            - name: {{ .Values.kibana.volumes.kibanaconfig.name }}
+              mountPath: {{ .Values.kibana.volumes.kibanaconfig.mountPath }}
+              subPath: {{ .Values.kibana.volumes.kibanaconfig.subPath }}
+          resources:
+            limits:
+              cpu: {{ .Values.kibana.resources.limits.cpu }}
+              memory: {{ .Values.kibana.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.kibana.resources.requests.cpu }}
+              memory: {{ .Values.kibana.resources.requests.memory }}
+      volumes:
+        - name: {{ .Values.kibana.volumes.kibanaconfig.name }}
+          configMap:
+            name: {{ include "kibana.fullname" . }}-config
