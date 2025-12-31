@@ -1,9 +1,10 @@
 🍔 Food Core Observability - Helm Chart Deployment
 🎯 Serviços de observabilidade
 
-🔎 Kibana (Monitoramento EFK)
-📡 Prometheus (Métricas de Aplicação)
-📊 Grafana (Dashboards de Monitoramento)
+🔎 Kibana - {{ .Values.kibana.ingress.path }} (Log)
+📡 Prometheus - {{ .Values.prometheus.ingress.path }} (Métricas)
+📊 Grafana - {{ .Values.grafana.ingress.path }} (Dashboards de Métricas)
+👣 Zipkin - {{ .Values.zipkin.ingress.path }} (Trace)
 
 🚀 Serviços de observabilidade implantados com sucesso! 
 🌐 Consulte FQDN do Frontend IP Configuration público do Application Gateway (Ingress)!
