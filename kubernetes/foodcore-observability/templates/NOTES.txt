@@ -1,12 +1,11 @@
 🍔 Food Core Observability - Helm Chart Deployment
-🎯 Serviços de observabilidade
 
-🔎 Kibana - {{ .Values.kibana.ingress.path }} (Log)
-📡 Prometheus - {{ .Values.prometheus.ingress.path }} (Métricas)
-📊 Grafana - {{ .Values.grafana.ingress.path }} (Dashboards de Métricas)
-👣 Zipkin - {{ .Values.zipkin.ingress.path }} (Trace)
-
-🚀 Serviços de observabilidade implantados com sucesso! 
+🎯 Serviços de observabilidade:
+    🔎 Kibana - {{ .Values.kibana.ingress.path }} (Log)
+    📡 Prometheus - {{ .Values.prometheus.ingress.path }} (Métricas)
+    📊 Grafana - {{ .Values.grafana.ingress.path }} (Dashboards de Métricas)
+    👣 Zipkin - {{ .Values.zipkin.ingress.path }} (Trace)
+    
 🌐 Consulte FQDN do Frontend IP Configuration público do Application Gateway (Ingress)!
 
 📖 Documentação completa: https://github.com/FIAP-SOAT-TECH-TEAM/foodcore-observability
