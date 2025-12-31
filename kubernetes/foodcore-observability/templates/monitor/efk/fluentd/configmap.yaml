@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fluentd.fullname" . }}-config
+  labels:
+    app: {{ include "fluentd.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+data:
+  FLUENT_ELASTICSEARCH_HOST: {{ include "elasticsearch.fullname" . }}-service
+  FLUENT_ELASTICSEARCH_PORT: {{ .Values.elasticsearch.ports.rest | quote }}
+  FLUENT_ELASTICSEARCH_SCHEME: {{ .Values.fluentd.elasticsearch.scheme | quote }}
+  FLUENTD_SYSTEMD_CONF: {{ .Values.fluentd.systemdConf | quote }}
+  # Caminho dos logs de containers que serão excluídos do tail pelo Fluentd
+  FLUENT_CONTAINER_TAIL_EXCLUDE_PATH: "{{ .Values.fluentd.volumes.varlog.mountPath }}/containers/{{ include "fluentd.fullname" . }}-daemonset*"
+  # Parser usado pelo Fluentd para interpretar logs dos containers
+  # Para o AKS utiliza-se o parser cri, que é compatível com os logs (stdout e stderr) redirecionados pelo containerd
+  # Para o Docker desktop utiliza o parser json, que é compatível com os logs (stdout e stderr) redirecionados pelo Docker Engine
+  FLUENT_CONTAINER_TAIL_PARSER_TYPE: {{ .Values.fluentd.containerTailParserType | quote }}
+  # Indica que o Fluentd deve ignorar os campos label presente nos metadados dos recursos Kubernetes
+  FLUENT_KUBERNETES_METADATA_SKIP_LABELS: {{ .Values.fluentd.skipLabels | quote }}

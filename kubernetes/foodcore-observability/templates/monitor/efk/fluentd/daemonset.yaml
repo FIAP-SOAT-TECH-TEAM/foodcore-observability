@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "fluentd.fullname" . }}-daemonset
+  labels:
+    app: {{ include "fluentd.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "fluentd.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "fluentd.name" . }}
+    spec:
+      serviceAccountName: {{ include "fluentd.fullname" . }}-serviceaccount
+      containers:
+        - name: {{ include "fluentd.name" . }}
+          image: "{{ .Values.fluentd.image.repository }}:{{ .Values.fluentd.image.tag }}"
+          env:
+            - name: FLUENT_ELASTICSEARCH_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fluentd.fullname" . }}-config
+                  key: FLUENT_ELASTICSEARCH_HOST
+            - name: FLUENT_ELASTICSEARCH_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fluentd.fullname" . }}-config
+                  key: FLUENT_ELASTICSEARCH_PORT
+            - name: FLUENT_ELASTICSEARCH_SCHEME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fluentd.fullname" . }}-config
+                  key: FLUENT_ELASTICSEARCH_SCHEME
+            - name: FLUENTD_SYSTEMD_CONF
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fluentd.fullname" . }}-config
+                  key: FLUENTD_SYSTEMD_CONF
+            - name: FLUENT_CONTAINER_TAIL_EXCLUDE_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fluentd.fullname" . }}-config
+                  key: FLUENT_CONTAINER_TAIL_EXCLUDE_PATH
+            - name: FLUENT_CONTAINER_TAIL_PARSER_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fluentd.fullname" . }}-config
+                  key: FLUENT_CONTAINER_TAIL_PARSER_TYPE
+            - name: FLUENT_KUBERNETES_METADATA_SKIP_LABELS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fluentd.fullname" . }}-config
+                  key: FLUENT_KUBERNETES_METADATA_SKIP_LABELS
+          resources:
+            limits:
+              memory: {{ .Values.fluentd.resources.limits.memory }}
+              cpu: {{ .Values.fluentd.resources.limits.cpu }}
+            requests:
+              cpu: {{ .Values.fluentd.resources.requests.cpu }}
+              memory: {{ .Values.fluentd.resources.requests.memory }}
+          volumeMounts:
+            - name: {{ .Values.fluentd.volumes.varlog.name }}
+              mountPath: {{ .Values.fluentd.volumes.varlog.mountPath }}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: {{ .Values.fluentd.volumes.varlog.name }}
+          hostPath:
+            path: {{ .Values.fluentd.volumes.varlog.hostPath }}

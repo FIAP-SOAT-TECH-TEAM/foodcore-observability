@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "prometheus.fullname" . }}-config
+  labels:
+    app: {{ include "prometheus.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      - job_name: 'kubernetes-nodes'   
+        kubernetes_sd_configs:
+          - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+            
+      - job_name: "foodcore-order-metrics"
+        metrics_path: /actuator/prometheus
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: ["{{ .Values.namespace.order.name }}"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: foodcore-order-service
+            action: keep
+
+      - job_name: "foodcore-catalog-metrics"
+        metrics_path: /actuator/prometheus
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: ["{{ .Values.namespace.catalog.name }}"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: foodcore-catalog-service
+            action: keep
+      
+      - job_name: "foodcore-payment-metrics"
+        metrics_path: /actuator/prometheus
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: ["{{ .Values.namespace.payment.name }}"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: foodcore-payment-service
+            action: keep

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "elasticsearch.fullname" . }}-config
+  labels:
+    app: {{ include "elasticsearch.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+data:
+  cluster.name: {{ .Values.elasticsearch.clusterName | quote }}
+  ES_JAVA_OPTS: {{ .Values.elasticsearch.javaOpts | quote }}
+  discovery.type: {{ .Values.elasticsearch.discoveryType | quote }}
+  xpack.security.enabled: {{ .Values.elasticsearch.sslEnabled | quote }}

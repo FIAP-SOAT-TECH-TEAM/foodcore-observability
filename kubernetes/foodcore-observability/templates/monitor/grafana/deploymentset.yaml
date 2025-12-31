@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "grafana.fullname" . }}-deployment
+  labels:
+    app: {{ include "grafana.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+spec:
+  replicas: {{ .Values.grafana.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "grafana.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "grafana.name" . }}
+    spec:
+      containers:
+        - name: {{ include "grafana.name" . }}
+          image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.grafana.ports.port }}
+              name: {{ .Values.grafana.ports.name }}
+          volumeMounts:
+            - name: {{ .Values.grafana.volumes.grafanaconfig.name }}
+              mountPath: {{ (index .Values.grafana.volumes.grafanaconfig.items 0).mountPath }}
+              subPath: {{ (index .Values.grafana.volumes.grafanaconfig.items 0).subPath }}
+            - name: {{ .Values.grafana.volumes.grafanaconfig.name }}
+              mountPath: {{ (index .Values.grafana.volumes.grafanaconfig.items 1).mountPath }}
+              subPath: {{ (index .Values.grafana.volumes.grafanaconfig.items 1).subPath }}
+            - name: {{ .Values.grafana.volumes.grafanadatasources.name }}
+              mountPath: {{ .Values.grafana.volumes.grafanadatasources.mountPath }}
+            - name: {{ .Values.grafana.volumes.grafanadashboards.name }}
+              mountPath: {{ .Values.grafana.volumes.grafanadashboards.mountPath }}
+          resources:
+            limits:
+              cpu: {{ .Values.grafana.resources.limits.cpu }}
+              memory: {{ .Values.grafana.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.grafana.resources.requests.cpu }}
+              memory: {{ .Values.grafana.resources.requests.memory }}
+      volumes:
+        - name: {{ .Values.grafana.volumes.grafanaconfig.name }}
+          configMap:
+            name: {{ include "grafana.fullname" . }}-config
+        - name: {{ .Values.grafana.volumes.grafanadatasources.name }}
+          configMap:
+            name: {{ include "grafana.fullname" . }}-config-ds
+        - name: {{ .Values.grafana.volumes.grafanadashboards.name }}
+          configMap:
+            name: {{ include "grafana.fullname" . }}-config-dashs

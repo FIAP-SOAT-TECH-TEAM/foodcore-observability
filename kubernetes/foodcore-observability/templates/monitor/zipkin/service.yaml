@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "zipkin.fullname" . }}-service
+  labels:
+    app: {{ include "zipkin.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+spec:
+  selector:
+    app: {{ include "zipkin.name" . }}
+  ports:
+    - port: {{ .Values.zipkin.ports.port }}
+      targetPort: {{ .Values.zipkin.ports.targetPort }}
+      name: {{ .Values.zipkin.ports.name }}

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "zipkin.fullname" . }}-deployment
+  labels:
+    app: {{ include "zipkin.name" . }}
+  namespace: {{ .Values.namespace.monitor.name }}
+spec:
+  replicas: {{ .Values.zipkin.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "zipkin.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "zipkin.name" . }}
+    spec:
+      containers:
+        - name: {{ include "zipkin.name" . }}
+          image: "{{ .Values.zipkin.image.repository }}:{{ .Values.zipkin.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.zipkin.ports.port }}
+              name: {{ .Values.zipkin.ports.name }}
+          resources:
+            limits:
+              cpu: {{ .Values.zipkin.resources.limits.cpu }}
+              memory: {{ .Values.zipkin.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.zipkin.resources.requests.cpu }}
+              memory: {{ .Values.zipkin.resources.requests.memory }}
