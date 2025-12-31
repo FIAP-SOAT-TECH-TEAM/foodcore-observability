@@ -9,7 +9,7 @@ metadata:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/use-private-ip: "false"
     appgw.ingress.kubernetes.io/health-probe-path: {{ .Values.zipkin.ingress.path | quote }}
-    appgw.ingress.kubernetes.io/health-probe-port: {{ .Values.zipkin.ports.port | quote }}
+    appgw.ingress.kubernetes.io/health-probe-port: {{ .Values.zipkin.ports.targetPort | quote }}
 
 spec:
   {{- if .Values.ingress.tls }}
