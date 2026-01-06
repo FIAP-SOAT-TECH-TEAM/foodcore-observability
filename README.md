@@ -1,37 +1,39 @@
-# 📊 Food Core Observability
+# 📊 FoodCore Observability
 
-Stack de observabilidade para monitoramento de microsserviços do projeto FoodCore, desenvolvida como parte do curso de Arquitetura de Software
-da FIAP (Tech Challenge).
+<div align="center">
+
+Stack de observabilidade para monitoramento de microsserviços do projeto FoodCore. Desenvolvida como parte do curso de Arquitetura de Software da FIAP (Tech Challenge).
+
+</div>
 
 <div align="center">
   <a href="#visao-geral">Visão Geral</a> •
-  <a href="#tecnologias">Tecnologias</a> •
-  <a href="#stack-de-observabilidade">Stack de Observabilidade</a> •
+  <a href="#stack">Stack de Observabilidade</a> •
   <a href="#recursos-provisionados">Recursos Provisionados</a> •
-  <a href="#estrutura-do-projeto">Estrutura do Projeto</a> •
-  <a href="#fluxo-de-deploy">Governança e Fluxo de Deploy</a>
+  <a href="#debitos-tecnicos">Débitos Técnicos</a> •
+  <a href="#deploy">Fluxo de Deploy</a> •
+  <a href="#contribuicao">Contribuição</a>
 </div><br>
 
-# ☁️ Observabilidade (Azure + Kubernetes)
+> 📽️ Vídeo de demonstração da arquitetura: [https://www.youtube.com/watch?v=XgUpOKJjqak](https://www.youtube.com/watch?v=XgUpOKJjqak)<br>
 
-<h2 id="visao-geral">📖 Visão Geral</h2>
+---
 
-Este repositório contém os **scripts de IaC (Terraform)** e o **Helm Chart** responsáveis por provisionar toda a stack de observabilidade do projeto FoodCore no cluster AKS.
+<h2 id="visao-geral">📋 Visão Geral</h2>
 
-A stack implementa os **três pilares da observabilidade**:
-- **Logs** (EFK Stack)
-- **Métricas** (Prometheus + Grafana)
-- **Traces** (Zipkin)
+Este repositório contém os scripts **Terraform** e o **Helm Chart** responsáveis por provisionar toda a stack de observabilidade do projeto FoodCore no cluster AKS.
 
-<h2 id="tecnologias">🚀 Tecnologias</h2>
+### Três Pilares da Observabilidade
 
-- **Terraform**
-- **Helm**
-- **Kubernetes (AKS)**
-- **Azure Cloud**
-- **GitHub Actions** para CI/CD
+| Pilar | Stack | Descrição |
+|-------|-------|-----------|
+| **Logs** | EFK | Elasticsearch, Fluentd, Kibana |
+| **Métricas** | Prometheus + Grafana | Coleta e visualização de métricas |
+| **Traces** | Zipkin | Rastreamento distribuído |
 
-<h2 id="stack-de-observabilidade">🔭 Stack de Observabilidade</h2>
+---
+
+<h2 id="stack">🔭 Stack de Observabilidade</h2>
 
 ### 📋 Logs - EFK Stack
 
@@ -41,141 +43,133 @@ A stack implementa os **três pilares da observabilidade**:
 | **Fluentd** | Coleta e agregação de logs dos containers | v1.18 |
 | **Kibana** | Visualização e análise de logs | 8.13.4 |
 
+**Funcionamento atual**:
+- Logs enviados para stdout/stderr pelos microsserviços (SLF4J)
+- Containerd redireciona para diretório de logs
+- Fluentd (DaemonSet) consome e envia para Elasticsearch
+
 ### 📈 Métricas - Prometheus + Grafana
 
-| Componente | Descrição | Versão |
-|------------|-----------|--------|
-| **Prometheus** | Coleta e armazenamento de métricas | latest |
-| **Grafana** | Dashboards e visualização de métricas | latest |
+| Componente | Descrição |
+|------------|-----------|
+| **Prometheus** | Coleta e armazenamento de métricas via scraping |
+| **Grafana** | Dashboards e visualização |
 
-> 📊 Inclui dashboard JVM Micrometer pré-configurado para monitoramento de aplicações Spring Boot.
+> 📊 Inclui dashboard **JVM Micrometer** pré-configurado para aplicações Spring Boot.
 
 ### 👣 Traces - Zipkin
 
-| Componente | Descrição | Versão |
-|------------|-----------|--------|
-| **Zipkin** | Rastreamento distribuído de requisições | latest |
+| Componente | Descrição |
+|------------|-----------|
+| **Zipkin** | Rastreamento distribuído de requisições |
+
+**Funcionamento atual**:
+- Auto-instrumentação via Micrometer Tracing
+- Spring Actuator expõe métricas para Prometheus
+
+---
 
 <h2 id="recursos-provisionados">📦 Recursos Provisionados</h2>
 
 ### Helm Chart
 
-O chart `foodcore-observability` provisiona no cluster Kubernetes:
+O chart `foodcore-observability` provisiona no Kubernetes:
 
-- **Elasticsearch StatefulSet** com volume persistente (3Gi)
-- **Fluentd DaemonSet** para coleta de logs em todos os nodes
-- **Kibana Deployment** com ingress configurado
-- **Prometheus Deployment** com ConfigMap de scrape configs
-- **Grafana Deployment** com datasources e dashboards pré-configurados
-- **Zipkin Deployment** para distributed tracing
-- **StorageClass** Azure Disk para volumes persistentes
-- **Ingress** para exposição dos serviços via Application Gateway
+| Recurso | Tipo | Descrição |
+|---------|------|-----------|
+| **Elasticsearch** | StatefulSet | Volume persistente (3Gi) |
+| **Fluentd** | DaemonSet | Coleta em todos os nodes |
+| **Kibana** | Deployment | Com Ingress configurado |
+| **Prometheus** | Deployment | ConfigMap de scrape configs |
+| **Grafana** | Deployment | Datasources e dashboards pré-configurados |
+| **Zipkin** | Deployment | Distributed tracing |
+| **StorageClass** | - | Azure Disk para volumes |
+| **Ingress** | - | Application Gateway |
 
 ### Endpoints de Acesso
 
-| Serviço | Path | Porta Interna |
-|---------|------|---------------|
+| Serviço | Path | Porta |
+|---------|------|-------|
 | Kibana | `/kibana` | 5601 |
 | Prometheus | `/prometheus` | 9090 |
 | Grafana | `/grafana` | 3000 |
 | Zipkin | `/zipkin` | 9411 |
 
-### Recursos Delegados pelo Repo de Infra
+---
 
-- **Cluster AKS**
-- **Namespaces** (monitor, order, catalog, payment)
-- **Application Gateway Ingress Controller**
-- **FQDN público do Ingress**
+<h2 id="debitos-tecnicos">⚠️ Débitos Técnicos</h2>
 
-<h2 id="estrutura-do-projeto">📁 Estrutura do Projeto</h2>
+<details>
+<summary>Expandir para mais detalhes</summary>
 
-```
-foodcore-observability/
-├── .github/
-│   ├── CODEOWNERS
-│   ├── pull_request_template.md
-│   └── workflows/
-│       ├── ci.yaml          # Pipeline de CI (Push Chart + Terraform Plan)
-│       ├── cd.yaml          # Pipeline de CD (Terraform Apply)
-│       └── destroy.yaml     # Pipeline de destruição
-├── kubernetes/
-│   └── foodcore-observability/
-│       ├── Chart.yaml       # Metadata do Helm Chart
-│       ├── values.yaml      # Valores de configuração
-│       ├── assets/
-│       │   └── grafana/
-│       │       └── dashboards/
-│       │           └── jvm_micrometer_dash.json
-│       └── templates/
-│           ├── NOTES.txt
-│           ├── monitor/
-│           │   ├── efk/           # Elasticsearch, Fluentd, Kibana
-│           │   ├── grafana/       # Grafana configs
-│           │   ├── prometheus/    # Prometheus configs
-│           │   └── zipkin/        # Zipkin configs
-│           └── volume/
-│               └── storageclass.yaml
-└── terraform/
-    ├── backend.tf
-    ├── main.tf
-    ├── variables.tf
-    ├── outputs.tf
-    └── modules/
-        └── helm/              # Módulo para deploy do Helm release
-```
+| Débito | Descrição | Impacto |
+|--------|-----------|---------|
+| **OpenTelemetry** | Migrar de Zipkin/Micrometer para OpenTelemetry | Padronização e vendor-neutral |
+| **Tracing** | Micrometer Tracing + Zipkin | OpenTelemetry SDK + Collector |
+| **Métricas** | Spring Actuator + Prometheus | OpenTelemetry Metrics |
+| **Logs** | SLF4J + Fluentd | OpenTelemetry Logs |
 
-<h2 id="fluxo-de-deploy">⚙️ Governança e Fluxo de Deploy</h2>
-
-A gestão da stack de observabilidade segue um processo **automatizado, auditável e controlado** via **Pull Requests**.
-Esse fluxo garante segurança, rastreabilidade e aprovação formal antes de qualquer mudança aplicada em produção.
+</details>
 
 ---
 
-### 📝 Processo de Alterações
+<h2 id="deploy">⚙️ Fluxo de Deploy</h2>
 
-1. **Criação de Pull Request**
-   - Todas as alterações (novos recursos, updates, ou ajustes de configuração) devem ser propostas via **Pull Request (PR)**.
-   - O PR contém os arquivos `.tf` ou templates Helm modificados e uma descrição detalhando o impacto da mudança.
+<details>
+<summary>Expandir para mais detalhes</summary>
 
-2. **Execução Automática do CI Pipeline**
-   - Ao abrir o PR, o pipeline de CI executa automaticamente:
-     - **Build e Push** do Helm Chart para o ACR (Azure Container Registry)
-     - **Terraform fmt** e **validate**
-     - **Terraform plan** - gerando prévia das alterações
-   - O resultado do `plan` é salvo como artefato para uso no deploy.
+### Pipeline CI
 
-3. **Revisão e Aprovação**
-   - O repositório é **protegido**, exigindo no mínimo **1 aprovação** de um codeowner antes do merge.
-   - Nenhum usuário pode aplicar alterações diretamente na branch principal (`main`).
-   - Revisores devem garantir:
-     - Que o `plan` não tenha destruições indevidas (`destroy`)
-     - Que as configurações dos serviços estejam corretas
-     - Que os resources requests/limits sejam adequados
-   - Todos os checks estipulados nas regras de proteção devem estar passando.
+1. Build e Push do Helm Chart para ACR
+2. `terraform fmt` e `validate`
+3. `terraform plan`
 
-4. **Aplicação no Merge**
-   - Após aprovação e merge do PR, o pipeline de CD executa automaticamente:
+### Pipeline CD
 
-     ```
-     terraform apply -auto-approve tfplan
-     ```
+1. `terraform apply`
+2. Deploy do Helm release no AKS
 
-   - O **Terraform Apply** aplica as alterações descritas no `plan` aprovado, atualizando o Helm release no cluster AKS.
+### Ordem de Provisionamento
+
+```
+1. foodcore-infra        (AKS, VNET)
+2. foodcore-db           (Bancos de dados)
+3. foodcore-observability ← Este repositório
+4. foodcore-*            (Microsserviços)
+```
+
+</details>
 
 ---
 
-### 🔄 Fluxo CI/CD
+<h2 id="contribuicao">🤝 Contribuição</h2>
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Pull Request  │────▶│   CI Pipeline   │────▶│     Review      │
-│     Opened      │     │  - Helm Push    │     │   & Approval    │
-└─────────────────┘     │  - TF Plan      │     └────────┬────────┘
-                        └─────────────────┘              │
-                                                         ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Observability │◀────│   CD Pipeline   │◀────│      Merge      │
-│    Deployed     │     │  - TF Apply     │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
+### Desenvolvimento Local
+
+```bash
+# Clonar repositório
+git clone https://github.com/FIAP-SOAT-TECH-TEAM/foodcore-observability.git
+cd foodcore-observability
+
+# Validar Helm Chart
+helm lint kubernetes/foodcore-observability
+
+# Template para debug
+helm template foodcore-observability kubernetes/foodcore-observability
+
+# Terraform
+cd terraform
+terraform init
+terraform validate
 ```
 
+### Licença
+
+Este projeto está licenciado sob a [MIT License](LICENSE).
+
+---
+
+<div align="center">
+  <strong>FIAP - Pós-graduação em Arquitetura de Software</strong><br>
+  Tech Challenge
+</div>
