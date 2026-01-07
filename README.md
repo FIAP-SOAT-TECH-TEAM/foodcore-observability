@@ -37,6 +37,7 @@ Este repositório contém os scripts **Terraform** e o **Helm Chart** responsáv
 
 ### 📋 Logs - EFK Stack
 
+
 | Componente | Descrição | Versão |
 |------------|-----------|--------|
 | **Elasticsearch** | Armazenamento e indexação de logs | 8.13.4 |
