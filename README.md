@@ -5,7 +5,7 @@
 Stack de observabilidade para monitoramento de microsserviços do projeto FoodCore. Desenvolvida como parte do curso de Arquitetura de Software da FIAP (Tech Challenge).
 
 </div>
-
+ 
 <div align="center">
   <a href="#visao-geral">Visão Geral</a> •
   <a href="#stack">Stack de Observabilidade</a> •
