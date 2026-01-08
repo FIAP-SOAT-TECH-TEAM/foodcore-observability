@@ -5,7 +5,7 @@
 Stack de observabilidade para monitoramento de microsserviços do projeto FoodCore. Desenvolvida como parte do curso de Arquitetura de Software da FIAP (Tech Challenge).
 
 </div>
-  
+
 <div align="center">
   <a href="#visao-geral">Visão Geral</a> •
   <a href="#stack">Stack de Observabilidade</a> •
@@ -37,7 +37,6 @@ Este repositório contém os scripts **Terraform** e o **Helm Chart** responsáv
 
 ### 📋 Logs - EFK Stack
 
-
 | Componente | Descrição | Versão |
 |------------|-----------|--------|
 | **Elasticsearch** | Armazenamento e indexação de logs | 8.13.4 |
@@ -45,6 +44,7 @@ Este repositório contém os scripts **Terraform** e o **Helm Chart** responsáv
 | **Kibana** | Visualização e análise de logs | 8.13.4 |
 
 **Funcionamento atual**:
+
 - Logs enviados para stdout/stderr pelos microsserviços (SLF4J)
 - Containerd redireciona para diretório de logs
 - Fluentd (DaemonSet) consome e envia para Elasticsearch
@@ -65,6 +65,7 @@ Este repositório contém os scripts **Terraform** e o **Helm Chart** responsáv
 | **Zipkin** | Rastreamento distribuído de requisições |
 
 **Funcionamento atual**:
+
 - Auto-instrumentação via Micrometer Tracing
 - Spring Actuator expõe métricas para Prometheus
 
@@ -110,7 +111,6 @@ O chart `foodcore-observability` provisiona no Kubernetes:
 | **Métricas** | Spring Actuator + Prometheus | OpenTelemetry Metrics |
 | **Logs** | SLF4J + Fluentd | OpenTelemetry Logs |
 
-
 <h2 id="limitacoes-quota">Limitações de Quota (Azure for Students)</h2>
 
 > A assinatura **Azure for Students** impõe as seguintes restrições:
@@ -124,6 +124,7 @@ O chart `foodcore-observability` provisiona no Kubernetes:
 > Durante o deploy dos microsserviços, Pods podem ficar com status **Pending** e o seguinte erro pode aparecer:
 >
 > <img src=".github/images/error.jpeg" alt="Error" />
+> <img src=".github/images/erroDeploy.jpeg" alt="Error" />
 >
 > **Causa**: O cluster atingiu o limite máximo de VMs permitido pela quota e não há recursos computacionais (CPU/memória) disponíveis nos nós existentes.
 >
