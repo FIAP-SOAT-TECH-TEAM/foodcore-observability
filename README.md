@@ -90,12 +90,14 @@ O chart `foodcore-observability` provisiona no Kubernetes:
 
 ### Endpoints de Acesso
 
-| Serviço | Path | Porta |
+| Serviço | Path | Ingress Port |
 |---------|------|-------|
-| Kibana | `/kibana` | 5601 |
-| Prometheus | `/prometheus` | 9090 |
-| Grafana | `/grafana` | 3000 |
-| Zipkin | `/zipkin` | 9411 |
+| Kibana | `/kibana` | 80 (Http) |
+| Prometheus | `/prometheus` | 80 (Http) |
+| Grafana | `/grafana` | 80 (Http) |
+| Zipkin | `/zipkin` | 80 (Http) |
+
+> ⚠️ A URL Base pode ser obtida via output terraform `aks_ingress_public_ip_fqdn` (foodcore-infra).
 
 ---
 
