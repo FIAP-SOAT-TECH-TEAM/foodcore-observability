@@ -1,7 +1,7 @@
 # 📊 FoodCore Observability
 
 <div align="center">
-
+ 
 Stack de observabilidade para monitoramento de microsserviços do projeto FoodCore. Desenvolvida como parte do curso de Arquitetura de Software da FIAP (Tech Challenge).
 
 </div>
