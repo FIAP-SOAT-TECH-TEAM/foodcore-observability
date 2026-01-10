@@ -10,8 +10,11 @@ Stack de observabilidade para monitoramento de microsserviços do projeto FoodCo
   <a href="#visao-geral">Visão Geral</a> •
   <a href="#stack">Stack de Observabilidade</a> •
   <a href="#servicos-expostos">Serviços Expostos</a> •
-  <a href="#debitos-tecnicos">Débitos Técnicos</a> •
+  <a href="#infra">Infraestrutura</a> •
+  <a href="#limitacoes-quota">Limitações de quotas</a> •
   <a href="#deploy">Fluxo de Deploy</a> •
+  <a href="#instalacao-e-uso">Instalação e Uso</a> •
+  <a href="#debitos-tecnicos">Débitos Técnicos</a> •
   <a href="#contribuicao">Contribuição</a>
 </div><br>
 
@@ -137,23 +140,10 @@ Este repositório contém os scripts **Terraform** e o **Helm Chart** responsáv
 
 ---
 
-
-
-
-
-
-
-<h2 id="debitos-tecnicos">⚠️ Débitos Técnicos</h2>
+<h2 id="limitacoes-quota">📉 Limitações de Quota (Azure for Students)</h2>
 
 <details>
 <summary>Expandir para mais detalhes</summary>
-
-| Débito | Descrição | Impacto |
-|--------|-----------|---------|
-| **OpenTelemetry** | Migrar de Micrometer para OpenTelemetry | Padronização de observabilidade |
-| **APM** | Usar uma ferramenta de APM ao invés de serviços isolados | Ferramenta unificada de observabilidade |
-
-<h2 id="limitacoes-quota">Limitações de Quota (Azure for Students)</h2>
 
 > A assinatura **Azure for Students** impõe as seguintes restrições:
 >
@@ -215,7 +205,7 @@ Este repositório contém os scripts **Terraform** e o **Helm Chart** responsáv
 
 ---
 
-<h2 id="instalacao">🚀 Instalação e Uso</h2>
+<h2 id="instalacao-e-uso">🚀 Instalação e Uso</h2>
 
 ### Desenvolvimento Local
 
@@ -230,6 +220,20 @@ cp docker/env-example docker/.env
 # Subir dependências
 ./food start:infra
 ```
+
+---
+
+<h2 id="debitos-tecnicos">⚠️ Débitos Técnicos</h2>
+
+<details>
+<summary>Expandir para mais detalhes</summary>
+
+| Débito | Descrição | Impacto |
+|--------|-----------|---------|
+| **OpenTelemetry** | Migrar de Micrometer para OpenTelemetry | Padronização de observabilidade |
+| **APM** | Usar uma ferramenta de APM ao invés de serviços isolados | Ferramenta unificada de observabilidade |
+
+</details>
 
 ---
 
